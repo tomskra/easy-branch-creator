@@ -56,6 +56,7 @@ class SettingsHub extends React.Component<{}, ISettingsHubState> {
                 defaultBranchNameTemplate: "",
                 branchNameTemplates: {},
                 lowercaseBranchName: false,
+                maxBranchNameLength: 0,
                 nonAlphanumericCharactersReplacement: "",
                 updateWorkItemState: false,
                 workItemState: {}
@@ -252,6 +253,25 @@ class SettingsHub extends React.Component<{}, ISettingsHubState> {
                                     }}
                                 />
                             </FormItem>
+                            <FormItem label="Maximum branch name length" className="margin-top-8" message="Set to 0 for no limit">
+                                <TextField
+                                    value={String(this.state.updatedSettingsDocument.maxBranchNameLength ?? 0)}
+                                    disabled={!this.state.isReady}
+                                    inputType="number"
+                                    onChange={(e, newValue) => {
+                                        const parsed = parseInt(newValue, 10);
+                                        const length = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+                                        this.setState(prevState => ({
+                                            ...prevState,
+                                            updatedSettingsDocument: {
+                                                ...prevState.updatedSettingsDocument,
+                                                maxBranchNameLength: length,
+                                            }
+                                        }))
+                                    }}
+                                    width={TextFieldWidth.standard}
+                                />
+                            </FormItem>
                         </form>
                     </Card>
                     <Card className="flex-grow">
@@ -376,6 +396,7 @@ class SettingsHub extends React.Component<{}, ISettingsHubState> {
 
         if (initialSettingsDocument.defaultBranchNameTemplate !== updatedSettingsDocument.defaultBranchNameTemplate ||
             initialSettingsDocument.lowercaseBranchName !== updatedSettingsDocument.lowercaseBranchName ||
+            initialSettingsDocument.maxBranchNameLength !== updatedSettingsDocument.maxBranchNameLength ||
             initialSettingsDocument.nonAlphanumericCharactersReplacement !== updatedSettingsDocument.nonAlphanumericCharactersReplacement ||
             initialSettingsDocument.updateWorkItemState !== updatedSettingsDocument.updateWorkItemState) {
             return false;

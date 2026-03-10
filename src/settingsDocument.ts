@@ -15,6 +15,7 @@ export default interface SettingsDocument {
     branchNameTemplates: Record<string, BranchNameTemplate>;
     nonAlphanumericCharactersReplacement: string;
     lowercaseBranchName: boolean;
+    maxBranchNameLength: number;
     updateWorkItemState: boolean;
     workItemState: Record<string, WorkItemStateSetting>;
 }

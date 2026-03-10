@@ -93,6 +93,10 @@ export class BranchCreator {
             branchName = branchName.toLowerCase();
         }
 
+        if (settingsDocument.maxBranchNameLength > 0) {
+            branchName = branchName.substring(0, settingsDocument.maxBranchNameLength);
+        }
+
         return branchName;
     }
 

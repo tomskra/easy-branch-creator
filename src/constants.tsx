@@ -8,6 +8,7 @@ export class Constants {
         branchNameTemplates: {},
         nonAlphanumericCharactersReplacement: "_",
         lowercaseBranchName: false,
+        maxBranchNameLength: 0,
         id: "",
         updateWorkItemState: false,
         workItemState: {}
