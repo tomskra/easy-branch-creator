@@ -257,7 +257,6 @@ class SettingsHub extends React.Component<{}, ISettingsHubState> {
                                 <TextField
                                     value={String(this.state.updatedSettingsDocument.maxBranchNameLength ?? 0)}
                                     disabled={!this.state.isReady}
-                                    inputType="number"
                                     onChange={(e, newValue) => {
                                         const parsed = parseInt(newValue, 10);
                                         const length = isNaN(parsed) || parsed < 0 ? 0 : parsed;
