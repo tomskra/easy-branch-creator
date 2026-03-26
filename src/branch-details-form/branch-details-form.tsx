@@ -22,12 +22,15 @@ interface ISelectBranchDetailsState {
     projectName?: string;
     workItems: number[];
     selectedRepositoryId?: string;
+    lastUsedRepositoryId?: string;
     sourceBranchName?: string;
     ready: boolean;
     branchNames: string[];
 }
 
 class BranchDetailsForm extends React.Component<{}, ISelectBranchDetailsState> {
+    private storageService = new StorageService();
+
     constructor(props: {}) {
         super(props);
         this.state = { workItems: [], branchNames: [], ready: false };
@@ -42,7 +45,11 @@ class BranchDetailsForm extends React.Component<{}, ISelectBranchDetailsState> {
                 SDK.resize(undefined, 275);
             }
 
-            this.setState({ projectName: config.projectName, workItems: config.workItems, selectedRepositoryId: config.initialValue, ready: false, branchNames: [] });
+            const lastUsedRepositoryId = await this.storageService.getLastUsedRepositoryId();
+
+            this.setState({ projectName: config.projectName, workItems: config.workItems, selectedRepositoryId: config.initialValue, lastUsedRepositoryId: lastUsedRepositoryId, ready: false, branchNames: [] });
+
+            const settingsDocument = await this.storageService.getSettings();
 
             await this.setBranchNames();
 
@@ -59,6 +66,7 @@ class BranchDetailsForm extends React.Component<{}, ISelectBranchDetailsState> {
                 <div className="flex-grow">
                     <RepositorySelect
                         projectName={this.state.projectName}
+                        initialRepositoryId={this.state.lastUsedRepositoryId}
                         onRepositoryChange={(newRepositoryId) => this.onRepositoryChange(newRepositoryId)} />
                     <BranchSelect
                         projectName={this.state.projectName}
@@ -78,21 +86,24 @@ class BranchDetailsForm extends React.Component<{}, ISelectBranchDetailsState> {
                         disabled={!this.state.selectedRepositoryId}
                         primary={true}
                         text="Create Branch"
-                        onClick={() => this.close(this.state.selectedRepositoryId && this.state.sourceBranchName ? {
+                        onClick={async () => this.close(this.state.selectedRepositoryId && this.state.sourceBranchName ? {
                             repositoryId: this.state.selectedRepositoryId,
                             sourceBranchName: this.state.sourceBranchName
                         } : undefined)}
                     />
                     <Button
                         text="Cancel"
-                        onClick={() => this.close(undefined)}
+                        onClick={async () => this.close(undefined)}
                     />
                 </ButtonGroup>
             </div>
         );
     }
 
-    private close(result: ISelectBranchDetailsResult | undefined) {
+    private async close(result: ISelectBranchDetailsResult | undefined) {
+        if (result !== undefined) {
+            await this.storageService.saveLastUsedRepositoryId(result.repositoryId);
+        }
         const config = SDK.getConfiguration();
         if (config.dialog) {
             config.dialog.close(result);
@@ -116,8 +127,7 @@ class BranchDetailsForm extends React.Component<{}, ISelectBranchDetailsState> {
     private async setBranchNames() {
         if (this.state.projectName) {
             const workItemTrackingRestClient = getClient(WorkItemTrackingRestClient);
-            const storageService = new StorageService();
-            const settingsDocument = await storageService.getSettings();
+            const settingsDocument = await this.storageService.getSettings();
 
             const branchCreator = new BranchCreator();
             let branchNames: string[] = [];

@@ -11,6 +11,7 @@ import { Icon } from "azure-devops-ui/Icon";
 
 export interface IRepositorySelectProps {
     projectName?: string;
+    initialRepositoryId?: string;
     onRepositoryChange: (newRepositoryId?: string) => void;
 }
 
@@ -87,8 +88,11 @@ export class RepositorySelect extends React.Component<IRepositorySelectProps, IR
         this.repositories.push(...repositories.map(t => { return { id: t.id, data: t.id, text: t.name } }));
 
         if (this.repositories.length > 0) {
-            this.setSelectedRepositoryId(repositories[0].id);
-            this.repositorySelection.select(0);
+            const initialIndex = this.props.initialRepositoryId
+                ? Math.max(repositories.findIndex(r => r.id === this.props.initialRepositoryId), 0)
+                : 0;
+            this.setSelectedRepositoryId(repositories[initialIndex].id);
+            this.repositorySelection.select(initialIndex);
         }
     }
 

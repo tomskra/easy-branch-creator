@@ -89,6 +89,14 @@ export class BranchCreator {
             branchName = branchName.replace(token, workItemFieldValue);
         });
 
+        if (settingsDocument.nonAlphanumericCharactersReplacement) {
+            const escapedReplacement = settingsDocument.nonAlphanumericCharactersReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const multipleReplacementsRegex = new RegExp(`${escapedReplacement}+`, 'g');
+            const leadingTrailingRegex = new RegExp(`^${escapedReplacement}+|${escapedReplacement}+$`, 'g');
+            branchName = branchName.replace(multipleReplacementsRegex, settingsDocument.nonAlphanumericCharactersReplacement);
+            branchName = branchName.replace(leadingTrailingRegex, '');
+        }
+
         if (settingsDocument.lowercaseBranchName) {
             branchName = branchName.toLowerCase();
         }

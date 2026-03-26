@@ -18,4 +18,5 @@ export default interface SettingsDocument {
     maxBranchNameLength: number;
     updateWorkItemState: boolean;
     workItemState: Record<string, WorkItemStateSetting>;
+    lastUsedRepositoryId?: string;
 }

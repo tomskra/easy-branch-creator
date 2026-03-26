@@ -5,6 +5,8 @@ import { Constants } from "./constants";
 
 const CollectionName: string = "ProjectSettings";
 const ScopeType: string = "Default";
+const UserPreferencesCollection: string = "UserPreferences";
+const UserScopeType: string = "User";
 
 export class StorageService {
     public static Foo: string = "Test";
@@ -63,5 +65,35 @@ export class StorageService {
         );
 
         return dataManager.setDocument(CollectionName, settingsDocument, { scopeType: ScopeType });
+    }
+
+    public async getLastUsedRepositoryId(): Promise<string | undefined> {
+        try {
+            const dataService = await this.getDataService();
+            const dataManager = await dataService.getExtensionDataManager(
+                SDK.getExtensionContext().id,
+                await SDK.getAccessToken()
+            );
+            const doc = await dataManager.getDocument(UserPreferencesCollection, "preferences", { scopeType: UserScopeType });
+            return doc?.lastUsedRepositoryId;
+        } catch {
+            return undefined;
+        }
+    }
+
+    public async saveLastUsedRepositoryId(repositoryId: string): Promise<void> {
+        const dataService = await this.getDataService();
+        const dataManager = await dataService.getExtensionDataManager(
+            SDK.getExtensionContext().id,
+            await SDK.getAccessToken()
+        );
+        let doc: { id: string; lastUsedRepositoryId: string; __etag?: string } = { id: "preferences", lastUsedRepositoryId: repositoryId };
+        try {
+            const existing = await dataManager.getDocument(UserPreferencesCollection, "preferences", { scopeType: UserScopeType });
+            doc.__etag = existing.__etag;
+        } catch {
+            // Document doesn't exist yet, create without __etag
+        }
+        await dataManager.setDocument(UserPreferencesCollection, doc, { scopeType: UserScopeType });
     }
 }
